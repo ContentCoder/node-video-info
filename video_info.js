@@ -1,50 +1,20 @@
 /*
  * video_info.js
  *
+ * node.js video information module.
  */
 
-var util 	= require('util'), 
-	cp 		= require('child_process');
+var util	= require('util'), 
+	cp		= require('child_process');
+
+util.log('Load video_info.js module.');
 
 exports.getInfo = function(file, callback) {
-	exports.getFullInfo(file, function(e, fullInfo) {
-		if (e) {
-			callback(e, null);
-		} else {
-			var info = {};
-			info.name 		= fullInfo.format.filename;
-			info.size 		= fullInfo.format.size;
-			info.format 	= fullInfo.format.format_name;
-			info.duration 	= fullInfo.format.duration;
-			info.bit_rate 	= fullInfo.format.bit_rate;
-			
-			for (var i = 0; i< fullInfo.streams.length; i++) {
-				var stream 	= fullInfo.streams[i];
-				if (stream.codec_type === 'audio') {
-					info.acodec 			= stream.codec_name;
-					info.channels 			= stream.channels;
-					info.sample_fmt 		= stream.sample_fmt;
-					info.sample_rate 		= stream.sample_rate;
-					info.bits_per_sample 	= stream.bits_per_sample;
-				}
-				if (stream.codec_type === 'video') {
-					info.vcodec 	= stream.codec_name;
-					info.width 		= stream.width;
-					info.height 	= stream.height;
-				}
-			}
-
-			callback(null, info);
-		}
-	});
-}
-
-exports.getFullInfo = function(file, callback) {
-	var strCmd 		= '-loglevel quiet -show_format -show_streams -print_format json' + ' ' + file;
-	var arrCmd 		= strCmd.split(' ');
-	var ffprobe 	= cp.spawn('ffprobe', arrCmd);
-	var stdout 		= '';
-	var err 		= {};
+	var strCmd 	= '-loglevel quiet -show_format -show_streams -print_format json' + ' ' + file;
+	var arrCmd 	= strCmd.split(' ');
+	var ffprobe = cp.spawn('ffprobe', arrCmd);
+	var stdout 	= '';
+	var err 	= {};
 
 	ffprobe.stdout.on('data', function(data) {
 		stdout += data;
@@ -69,7 +39,7 @@ exports.getFullInfo = function(file, callback) {
     });	
 }
 
-exports.getThumbnail = function(file, thumb, time, callback) {
+exports.getThumbnail = function(file, thumb, callback) {
     var strCmd 	= '-y -i ' + file + ' -vf thumbnail -frames:v 1 ' + thumb;
     var arrCmd 	= strCmd.split(' ');
     var ffmpeg 	= cp.spawn('ffmpeg', arrCmd);
